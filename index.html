@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Family Finance Hub: Guided Setup</title>
+  <title>Household Finance Wizard (Multi-Person)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,10 +13,12 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 500: '#0ea5e9',
-              600: '#0284c7', 700: '#0369a1', 900: '#0c4a6e',
-            }
+            brand: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 900: '#0c4a6e' },
+            emerald: { 500: '#10b981', 600: '#059669', 900: '#064e3b' },
+            amber: { 500: '#f59e0b', 600: '#d97706', 900: '#78350f' },
+            violet: { 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' },
+            rose: { 500: '#f43f5e', 600: '#e11d48', 900: '#881337' },
+            cyan: { 500: '#06b6d4', 600: '#0891b2', 900: '#164e63' }
           }
         }
       }
@@ -44,25 +46,64 @@
       from { opacity: 0; transform: translateX(-10px); }
       to { opacity: 1; transform: translateX(0); }
     }
+
+    /* Dynamic Theme Overrides for JS injection */
+    .theme-brand { border-color: rgba(14, 165, 233, 0.3); }
+    .text-theme-brand { color: #0ea5e9; }
+    .bg-theme-brand { background-color: #0ea5e9; }
+    
+    .theme-emerald { border-color: rgba(16, 185, 129, 0.3); }
+    .text-theme-emerald { color: #10b981; }
+    .bg-theme-emerald { background-color: #10b981; }
+
+    .theme-violet { border-color: rgba(139, 92, 246, 0.3); }
+    .text-theme-violet { color: #8b5cf6; }
+    .bg-theme-violet { background-color: #8b5cf6; }
+
+    .theme-amber { border-color: rgba(245, 158, 11, 0.3); }
+    .text-theme-amber { color: #f59e0b; }
+    .bg-theme-amber { background-color: #f59e0b; }
+
+    .theme-cyan { border-color: rgba(6, 182, 212, 0.3); }
+    .text-theme-cyan { color: #06b6d4; }
+    .bg-theme-cyan { background-color: #06b6d4; }
+
+    .theme-rose { border-color: rgba(244, 63, 94, 0.3); }
+    .text-theme-rose { color: #f43f5e; }
+    .bg-theme-rose { background-color: #f43f5e; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white flex flex-col relative">
+
+  <!-- Custom Modal UI -->
+  <div id="custom-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-sm w-full shadow-2xl transform transition-all scale-95 opacity-0 animate-[fadeIn_0.2s_ease-out_forwards]">
+      <h3 id="modal-title" class="text-lg font-bold text-white mb-2">Notice</h3>
+      <p id="modal-msg" class="text-sm text-slate-400 mb-6">Message goes here.</p>
+      <div class="flex justify-end gap-3" id="modal-actions">
+        <!-- Buttons injected here -->
+      </div>
+    </div>
+  </div>
 
   <!-- Header -->
   <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="bg-gradient-to-tr from-brand-500 to-emerald-500 p-2.5 rounded-xl shadow-lg shadow-brand-500/20">
-          <i class="fa-solid fa-map-location-dot text-white text-lg"></i>
+        <div class="bg-gradient-to-tr from-brand-500 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-brand-500/20">
+          <i class="fa-solid fa-people-roof text-white text-lg"></i>
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-            Family Finance Hub
+            Household Finance Engine
           </h1>
-          <p class="text-xs text-slate-400">Guided Scenario Builder</p>
+          <p class="text-xs text-slate-400">Multi-Person Setup</p>
         </div>
       </div>
       <div class="flex items-center space-x-4">
+        <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 opacity-0 transition-opacity duration-300" id="save-indicator">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Saved
+        </span>
         <button onclick="resetDefaults()" class="text-xs text-slate-500 hover:text-rose-400 transition-colors flex items-center gap-1.5">
           <i class="fa-solid fa-rotate-right"></i> Restart
         </button>
@@ -70,7 +111,7 @@
     </div>
   </header>
 
-  <!-- Progress Bar (Made Sticky below the Header) -->
+  <!-- Sticky Progress Bar -->
   <div class="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 sticky top-16 z-40 shadow-md">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex items-center justify-between relative">
@@ -80,7 +121,7 @@
         <!-- Step Indicators -->
         <div class="relative z-10 flex flex-col items-center step-dot cursor-pointer" onclick="goToStep(1)">
           <div id="dot-1" class="w-8 h-8 rounded-full bg-brand-600 border-4 border-slate-900 flex items-center justify-center text-xs font-bold text-white transition-colors">1</div>
-          <span class="text-[10px] mt-1 text-brand-400 font-medium absolute -bottom-4 whitespace-nowrap">Welcome</span>
+          <span class="text-[10px] mt-1 text-brand-400 font-medium absolute -bottom-4 whitespace-nowrap">Household</span>
         </div>
         <div class="relative z-10 flex flex-col items-center step-dot cursor-pointer" onclick="goToStep(2)">
           <div id="dot-2" class="w-8 h-8 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-xs font-bold text-slate-400 transition-colors">2</div>
@@ -88,7 +129,7 @@
         </div>
         <div class="relative z-10 flex flex-col items-center step-dot cursor-pointer" onclick="goToStep(3)">
           <div id="dot-3" class="w-8 h-8 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-xs font-bold text-slate-400 transition-colors">3</div>
-          <span class="text-[10px] mt-1 text-slate-500 font-medium absolute -bottom-4 whitespace-nowrap" id="lbl-dot-3">Joint</span>
+          <span class="text-[10px] mt-1 text-slate-500 font-medium absolute -bottom-4 whitespace-nowrap" id="lbl-dot-3">Joint Bills</span>
         </div>
         <div class="relative z-10 flex flex-col items-center step-dot cursor-pointer" onclick="goToStep(4)">
           <div id="dot-4" class="w-8 h-8 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-xs font-bold text-slate-400 transition-colors">4</div>
@@ -108,97 +149,57 @@
     </div>
   </div>
 
-  <main class="flex-grow flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <main class="flex-grow flex flex-col w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     
-    <!-- STEP 1: WELCOME & NAMES -->
+    <!-- STEP 1: HOUSEHOLD MEMBERS -->
     <div id="step-1" class="step-container active">
-      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-8 sm:p-12 text-center shadow-2xl">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-8 sm:p-12 text-center shadow-2xl max-w-4xl mx-auto">
         <div class="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <i class="fa-solid fa-handshake-angle text-4xl text-brand-500"></i>
+          <i class="fa-solid fa-people-group text-4xl text-brand-500"></i>
         </div>
-        <h2 class="text-3xl font-bold text-slate-100 mb-4">Let's build your financial roadmap.</h2>
+        <h2 class="text-3xl font-bold text-slate-100 mb-4">Who is in the financial household?</h2>
         <p class="text-slate-400 text-sm max-w-2xl mx-auto leading-relaxed mb-10">
-          Merging finances is complicated. This tool helps you map out your incomes, household bills, and personal debts to see exactly how different strategies impact your bottom line. We'll walk through it step-by-step.
+          This engine supports anywhere from 1 to 6 people. Whether you are flying solo, budgeting as a couple, or splitting expenses among roommates, add the members below.
         </p>
 
-        <div class="max-w-md mx-auto space-y-6 text-left">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 text-center">First, who is using this planner?</h3>
+        <div class="max-w-xl mx-auto text-left">
+          <div id="users-list-container" class="space-y-4 mb-6">
+            <!-- Injected via JS -->
+          </div>
           
-          <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-            <label class="text-xs text-slate-400 ml-1 mb-1 block">Partner 1 Name</label>
-            <div class="relative flex items-center">
-              <i class="fa-solid fa-user absolute left-4 text-brand-500"></i>
-              <input type="text" id="name-p1" oninput="updateNames()" value="Partner 1" class="w-full bg-transparent border-none pl-10 pr-4 py-2 text-lg font-bold text-brand-300 focus:ring-0 outline-none">
-            </div>
-          </div>
-
-          <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-            <label class="text-xs text-slate-400 ml-1 mb-1 block">Partner 2 Name</label>
-            <div class="relative flex items-center">
-              <i class="fa-solid fa-user-tie absolute left-4 text-emerald-500"></i>
-              <input type="text" id="name-p2" oninput="updateNames()" value="Partner 2" class="w-full bg-transparent border-none pl-10 pr-4 py-2 text-lg font-bold text-emerald-300 focus:ring-0 outline-none">
-            </div>
-          </div>
+          <button onclick="addUser()" id="btn-add-user" class="w-full py-3 rounded-xl border-2 border-dashed border-slate-700 text-slate-400 text-sm font-bold hover:border-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> Add Household Member
+          </button>
         </div>
       </div>
     </div>
 
     <!-- STEP 2: INCOMES -->
     <div id="step-2" class="step-container">
-      <div class="mb-6">
+      <div class="mb-6 max-w-4xl mx-auto text-center">
         <h2 class="text-2xl font-bold text-slate-100">Monthly Net Incomes</h2>
-        <p class="text-slate-400 text-sm mt-2">Enter your take-home pay (after taxes, 401k, etc.). You can add multiple income streams like side hustles or rental properties.</p>
+        <p class="text-slate-400 text-sm mt-2">Enter the take-home pay for each member of the household.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- P1 Incomes -->
-        <div class="bg-slate-900/80 border border-brand-500/30 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
-          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-            <h3 class="font-bold text-brand-300 text-lg display-name-p1">Partner 1</h3>
-            <div class="text-right">
-              <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Total Net</span>
-              <span id="subtotal-p1-inc" class="text-lg font-bold text-brand-400">$0</span>
-            </div>
-          </div>
-          <div id="p1-incomes-list" class="space-y-3 mb-4"></div>
-          <button onclick="addDynamicItem('p1Incomes')" class="w-full py-2 rounded-xl border border-brand-500/30 text-brand-400 text-xs font-bold hover:bg-brand-500/10 transition-colors">
-            <i class="fa-solid fa-plus mr-1"></i> Add Income Source
-          </button>
-        </div>
-
-        <!-- P2 Incomes -->
-        <div class="bg-slate-900/80 border border-emerald-500/30 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
-          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-            <h3 class="font-bold text-emerald-300 text-lg display-name-p2">Partner 2</h3>
-            <div class="text-right">
-              <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Total Net</span>
-              <span id="subtotal-p2-inc" class="text-lg font-bold text-emerald-400">$0</span>
-            </div>
-          </div>
-          <div id="p2-incomes-list" class="space-y-3 mb-4"></div>
-          <button onclick="addDynamicItem('p2Incomes')" class="w-full py-2 rounded-xl border border-emerald-500/30 text-emerald-400 text-xs font-bold hover:bg-emerald-500/10 transition-colors">
-            <i class="fa-solid fa-plus mr-1"></i> Add Income Source
-          </button>
-        </div>
+      <div id="step2-income-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Cards Injected via JS -->
       </div>
       
       <!-- Household Total Bar -->
-      <div class="mt-6 bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between px-6">
-        <span class="text-sm font-bold text-slate-400 uppercase tracking-wider">Total Household Net Income</span>
+      <div class="mt-6 bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between px-6 max-w-4xl mx-auto">
+        <span class="text-sm font-bold text-slate-400 uppercase tracking-wider">Total Household Pool</span>
         <span id="wizard-total-income" class="text-2xl font-bold text-white">$0</span>
       </div>
     </div>
 
     <!-- STEP 3: JOINT EXPENSES -->
-    <div id="step-3" class="step-container">
+    <div id="step-3" class="step-container max-w-5xl mx-auto">
       <div class="mb-6">
         <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
           Joint Household Bills <i class="fa-solid fa-house-chimney text-amber-500 text-xl ml-2"></i>
         </h2>
         <p class="text-slate-400 text-sm mt-2 leading-relaxed">
-          These are the expenses you share together as a family. Think mortgage, rent, groceries, utilities, childcare, or joint subscriptions.
+          These are the core expenses shared collectively by the household (Rent, Groceries, Shared Utilities).
         </p>
       </div>
 
@@ -213,10 +214,10 @@
             </div>
           </div>
           
-          <div id="joint-expenses-list" class="space-y-3 mb-4 max-h-[40vh] overflow-y-auto pr-2"></div>
+          <div id="joint-expenses-list" class="space-y-3 mb-4 max-h-[50vh] overflow-y-auto pr-2"></div>
           
-          <button onclick="addDynamicItem('jointExpenses')" class="w-full py-2.5 rounded-xl border border-amber-500/30 text-amber-400 text-xs font-bold hover:bg-amber-500/10 transition-colors">
-            <i class="fa-solid fa-plus mr-1"></i> Add Joint Bill
+          <button onclick="addJointItem()" class="w-full py-2.5 rounded-xl border border-amber-500/30 text-amber-400 text-xs font-bold hover:bg-amber-500/10 transition-colors">
+            <i class="fa-solid fa-plus mr-1"></i> Add Shared Bill
           </button>
         </div>
 
@@ -228,7 +229,7 @@
             <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-2">
               <i class="fa-solid fa-calculator text-slate-500"></i> House Estimator
             </h4>
-            <p class="text-[10px] text-slate-500 mb-4">Planning to buy? Estimate a mortgage and inject it into your joint bills.</p>
+            <p class="text-[10px] text-slate-500 mb-4">Planning a move? Estimate a mortgage and inject it into your joint bills.</p>
 
             <div class="space-y-4">
               <div class="space-y-1">
@@ -255,7 +256,7 @@
               </div>
               
               <!-- 2x2 Grid for Rates and Taxes -->
-              <div class="grid grid-cols-2 gap-3 mt-2">
+              <div class="grid grid-cols-3 gap-2 mt-2">
                 <div class="space-y-1 relative z-10">
                   <label class="text-[9px] text-slate-500">Rate (%)</label>
                   <input type="number" id="input-est-rate" oninput="runMortgageEstimator()" class="w-full bg-slate-900 border border-slate-800 text-[11px] rounded-lg px-1.5 py-1.5 text-slate-200" value="6.5" step="0.1">
@@ -272,8 +273,8 @@
                   <label class="text-[9px] text-slate-500">Tax (%)</label>
                   <input type="number" id="input-est-tax" oninput="runMortgageEstimator()" class="w-full bg-slate-900 border border-slate-800 text-[11px] rounded-lg px-1.5 py-1.5 text-slate-200" value="1.2" step="0.1">
                 </div>
-                <div class="space-y-1 relative z-10">
-                  <label class="text-[9px] text-slate-500">Ins ($/mo)</label>
+                <div class="space-y-1 relative z-10 col-span-3">
+                  <label class="text-[9px] text-slate-500">Home Ins ($/mo)</label>
                   <input type="number" id="input-est-ins" oninput="runMortgageEstimator()" class="w-full bg-slate-900 border border-slate-800 text-[11px] rounded-lg px-1.5 py-1.5 text-slate-200" value="125">
                 </div>
               </div>
@@ -286,7 +287,7 @@
               <span id="est-total-piti" class="text-sm font-bold text-white">$0</span>
             </div>
             <button onclick="injectMortgageToJoint(event)" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-arrow-left"></i> Add as Joint Bill
+              <i class="fa-solid fa-arrow-left"></i> Add as Shared Bill
             </button>
           </div>
         </div>
@@ -295,62 +296,28 @@
 
     <!-- STEP 4: PERSONAL EXPENSES -->
     <div id="step-4" class="step-container">
-      <div class="mb-6">
+      <div class="mb-6 max-w-4xl mx-auto text-center">
         <h2 class="text-2xl font-bold text-slate-100">Personal & Individual Bills</h2>
-        <p class="text-slate-400 text-sm mt-2 max-w-3xl">
-          These are bills that belong strictly to one person. Common examples include existing student loans, a personal car payment, or individual subscriptions. We map these out so we can see how much *true* discretionary fun money each person has left.
+        <p class="text-slate-400 text-sm mt-2">
+          Bills belonging strictly to one person (student loans, individual car payments). We map these to find out the *true* final discretionary money.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- P1 Personal Exp -->
-        <div class="bg-slate-900/80 border border-rose-500/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-            <div>
-              <h3 class="font-bold text-slate-200 text-sm display-name-p1 uppercase tracking-wider">Partner 1</h3>
-              <p class="text-[10px] text-slate-500 mt-0.5">Individual Obligations</p>
-            </div>
-            <div class="text-right bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
-              <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Total</span>
-              <span id="subtotal-p1-exp" class="text-sm font-bold text-rose-400">$0</span>
-            </div>
-          </div>
-          <div id="p1-expenses-list" class="space-y-3 mb-4"></div>
-          <button onclick="addDynamicItem('p1Expenses')" class="w-full py-2 rounded-xl border border-slate-700 text-slate-400 text-xs font-bold hover:bg-slate-800 hover:text-slate-200 transition-colors">
-            <i class="fa-solid fa-plus mr-1"></i> Add Personal Bill
-          </button>
-        </div>
-
-        <!-- P2 Personal Exp -->
-        <div class="bg-slate-900/80 border border-rose-500/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
-          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-            <div>
-              <h3 class="font-bold text-slate-200 text-sm display-name-p2 uppercase tracking-wider">Partner 2</h3>
-              <p class="text-[10px] text-slate-500 mt-0.5">Individual Obligations</p>
-            </div>
-            <div class="text-right bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
-              <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Total</span>
-              <span id="subtotal-p2-exp" class="text-sm font-bold text-rose-400">$0</span>
-            </div>
-          </div>
-          <div id="p2-expenses-list" class="space-y-3 mb-4"></div>
-          <button onclick="addDynamicItem('p2Expenses')" class="w-full py-2 rounded-xl border border-slate-700 text-slate-400 text-xs font-bold hover:bg-slate-800 hover:text-slate-200 transition-colors">
-            <i class="fa-solid fa-plus mr-1"></i> Add Personal Bill
-          </button>
-        </div>
+      <div id="step4-expense-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Cards Injected via JS -->
       </div>
     </div>
 
     <!-- STEP 5: THE STRATEGY SPLIT -->
-    <div id="step-5" class="step-container">
-      <div class="mb-6 text-center max-w-2xl mx-auto">
-        <h2 class="text-2xl font-bold text-slate-100">Choose Your Split Architecture</h2>
-        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
-          This is the most important decision. Based on your inputs, your household generates <strong class="text-white" id="wiz-strategy-income">$0</strong>/mo and has <strong class="text-white" id="wiz-strategy-bills">$0</strong>/mo in joint bills. How should we divide those bills?
+    <div id="step-5" class="step-container max-w-4xl mx-auto">
+      <div class="mb-6 text-center">
+        <h2 class="text-2xl font-bold text-slate-100">Choose the Split Architecture</h2>
+        <p class="text-slate-400 text-sm mt-3 leading-relaxed" id="wiz-strategy-desc">
+          Your household generates <strong class="text-white" id="wiz-strategy-income">$0</strong>/mo and shares <strong class="text-white" id="wiz-strategy-bills">$0</strong>/mo in joint bills. How should we divide those shared bills?
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+      <div id="strategy-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         
         <!-- APPROACH 1 CARD -->
         <div id="card-app-1" onclick="switchSplitApproach(1)" class="cursor-pointer group relative bg-slate-900 border-2 border-brand-500 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1">
@@ -360,19 +327,18 @@
             </div>
           </div>
           <h3 class="text-lg font-bold text-slate-100 mb-2">1. Proportional Split</h3>
-          <p class="text-xs text-slate-400 mb-6 min-h-[40px]">We split joint bills based on who makes what. Personal money stays completely separate.</p>
+          <p class="text-xs text-slate-400 mb-6 min-h-[40px]">We split joint bills mathematically based on who makes what. Personal money stays completely separate.</p>
           
           <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-sm space-y-3">
             <div class="flex justify-between items-center text-xs">
-              <span class="text-slate-500">Your Income Split:</span>
-              <span class="font-bold text-slate-300" id="wiz-app1-ratio">0% / 0%</span>
+              <span class="text-slate-500">Income Ratios:</span>
+              <span class="font-bold text-slate-300 flex gap-1" id="wiz-app1-ratio"></span>
             </div>
             <div class="h-px bg-slate-800"></div>
-            <p class="text-[11px] text-slate-400 leading-relaxed">
-              <strong class="text-brand-300 display-name-p1">P1</strong> pays <strong class="text-white" id="wiz-app1-p1-pay">$0</strong> towards joint bills.<br>
-              <strong class="text-emerald-300 display-name-p2">P2</strong> pays <strong class="text-white" id="wiz-app1-p2-pay">$0</strong> towards joint bills.
-            </p>
-            <p class="text-[10px] text-slate-500 italic mt-2">Whatever is left of your paycheck is yours to pay personal bills and keep.</p>
+            <div id="wiz-app1-breakdown" class="space-y-1.5">
+              <!-- JS maps text here -->
+            </div>
+            <p class="text-[10px] text-slate-500 italic mt-3 border-t border-slate-800/50 pt-2">Whatever is left of a paycheck is kept by that person to handle their own personal bills.</p>
           </div>
         </div>
 
@@ -384,7 +350,7 @@
             </div>
           </div>
           <h3 class="text-lg font-bold text-slate-100 mb-2">2. Equal Fun Money</h3>
-          <p class="text-xs text-slate-400 mb-6 min-h-[40px]">We pool all income, pay ALL bills (Joint + Personal), save a target amount, and split the rest exactly 50/50.</p>
+          <p class="text-xs text-slate-400 mb-6 min-h-[40px]">We pool all income, pay ALL bills (Joint + Personal), save a target amount, and split the remaining cash equally.</p>
           
           <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-4">
             
@@ -400,7 +366,7 @@
             <div class="h-px bg-slate-800"></div>
             
             <p class="text-[11px] text-slate-400 leading-relaxed">
-              After pooling everything, paying all bills, and hitting the savings target, you both get exactly:<br>
+              After pooling everything, paying all bills, and hitting the savings target, everyone gets exactly:<br>
               <span class="block text-center mt-2 text-xl font-bold text-white bg-slate-900 py-2 rounded-xl border border-slate-800" id="wiz-app2-fun-money">$0 <span class="text-[9px] text-slate-500 font-normal ml-1">each in pocket money</span></span>
             </p>
           </div>
@@ -426,21 +392,22 @@
           <p id="dash-joint-income" class="text-xl font-bold text-slate-100 mt-1">$0</p>
         </div>
         <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-          <p class="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Total Bills</p>
+          <p class="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Total Bills Used</p>
           <p id="dash-joint-bills" class="text-xl font-bold text-slate-100 mt-1">$0</p>
         </div>
         <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
           <p class="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Joint Savings</p>
           <p id="dash-joint-savings" class="text-xl font-bold text-indigo-400 mt-1">$0</p>
         </div>
-        <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-emerald-500">
-          <p class="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Net Surplus Buffer</p>
+        <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-emerald-500" id="dash-surplus-container">
+          <p class="text-[9px] text-slate-500 uppercase tracking-wider font-bold" title="Surplus after Joint Bills are paid, before personal bills.">Joint Surplus Buffer</p>
           <p id="dash-household-surplus" class="text-xl font-bold text-emerald-400 mt-1">$0</p>
+          <p class="text-[9px] text-slate-500 mt-1 leading-tight">Remaining <b>before</b> Personal Bills</p>
         </div>
       </div>
 
       <!-- Dynamic Settings Adjustment (For App 2 only) -->
-      <div id="step6-strategy-controls" class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 mb-6 hidden animate-fade-in">
+      <div id="step6-strategy-controls" class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 mb-6 hidden animate-fade-in w-full">
         <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Adjust Strategy Settings</h4>
         <div class="w-full">
           <div class="flex justify-between items-center text-xs mb-2">
@@ -461,13 +428,10 @@
           
           <div class="relative w-48 h-48">
             <canvas id="budgetChart"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span id="chart-center-ratio" class="text-lg font-bold text-slate-200 mt-0.5">0% / 0%</span>
-            </div>
+            <!-- Center label removed for cleaner N-player look -->
           </div>
-          <div class="w-full mt-6 space-y-2 text-[10px]">
-             <div class="flex justify-between text-slate-400"><span class="flex items-center gap-1.5"><div class="w-2 h-2 bg-brand-500 rounded-full"></div><span class="display-name-p1">P1</span> Contrib</span><span id="dash-p1-contrib" class="font-bold text-slate-200">$0</span></div>
-             <div class="flex justify-between text-slate-400"><span class="flex items-center gap-1.5"><div class="w-2 h-2 bg-emerald-500 rounded-full"></div><span class="display-name-p2">P2</span> Contrib</span><span id="dash-p2-contrib" class="font-bold text-slate-200">$0</span></div>
+          <div id="chart-legend-container" class="w-full mt-6 space-y-2 text-[10px]">
+             <!-- Injected via JS -->
           </div>
         </div>
 
@@ -478,77 +442,15 @@
             <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400" id="dash-strategy-label">Strategy Used</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <!-- P1 Wallet -->
-            <div class="bg-slate-950 p-5 rounded-2xl border border-brand-500/20 relative overflow-hidden">
-               <div class="flex justify-between items-center border-b border-slate-800/50 pb-2 mb-3">
-                 <span class="text-sm font-bold text-brand-300 display-name-p1">Partner 1</span>
-               </div>
-               <div class="space-y-2 text-xs">
-                 <div class="flex justify-between text-slate-400">
-                   <span>Starting Net Income</span>
-                   <span id="p1-starting-income" class="font-bold text-slate-200">$0</span>
-                 </div>
-                 <div class="flex justify-between text-amber-400/80">
-                   <span id="lbl-p1-contrib">- Joint Contribution</span>
-                   <span id="p1-joint-contrib">-$0</span>
-                 </div>
-                 <div class="h-px bg-slate-800 my-1"></div>
-                 <div class="flex justify-between text-slate-300">
-                   <span>Pocket Money Base</span>
-                   <span id="p1-pocket-base" class="font-bold text-slate-200">$0</span>
-                 </div>
-                 <div class="flex justify-between text-rose-400/80">
-                   <span id="lbl-p1-pers">- Personal Bills</span>
-                   <span id="p1-personal-bills">-$0</span>
-                 </div>
-                 <div class="h-px bg-slate-800 my-2"></div>
-                 <div class="flex justify-between items-center">
-                   <span class="font-bold text-slate-300">Final Discretionary</span>
-                   <span id="p1-final-discretionary" class="text-xl font-bold text-brand-400">$0</span>
-                 </div>
-               </div>
-               <div id="p1-deficit-warning" class="text-[10px] text-rose-400 font-bold mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Cannot cover personal bills!</div>
-            </div>
-
-            <!-- P2 Wallet -->
-            <div class="bg-slate-950 p-5 rounded-2xl border border-emerald-500/20 relative overflow-hidden">
-               <div class="flex justify-between items-center border-b border-slate-800/50 pb-2 mb-3">
-                 <span class="text-sm font-bold text-emerald-300 display-name-p2">Partner 2</span>
-               </div>
-               <div class="space-y-2 text-xs">
-                 <div class="flex justify-between text-slate-400">
-                   <span>Starting Net Income</span>
-                   <span id="p2-starting-income" class="font-bold text-slate-200">$0</span>
-                 </div>
-                 <div class="flex justify-between text-amber-400/80">
-                   <span id="lbl-p2-contrib">- Joint Contribution</span>
-                   <span id="p2-joint-contrib">-$0</span>
-                 </div>
-                 <div class="h-px bg-slate-800 my-1"></div>
-                 <div class="flex justify-between text-slate-300">
-                   <span>Pocket Money Base</span>
-                   <span id="p2-pocket-base" class="font-bold text-slate-200">$0</span>
-                 </div>
-                 <div class="flex justify-between text-rose-400/80">
-                   <span id="lbl-p2-pers">- Personal Bills</span>
-                   <span id="p2-personal-bills">-$0</span>
-                 </div>
-                 <div class="h-px bg-slate-800 my-2"></div>
-                 <div class="flex justify-between items-center">
-                   <span class="font-bold text-slate-300">Final Discretionary</span>
-                   <span id="p2-final-discretionary" class="text-xl font-bold text-emerald-400">$0</span>
-                 </div>
-               </div>
-               <div id="p2-deficit-warning" class="text-[10px] text-rose-400 font-bold mt-3 hidden"><i class="fa-solid fa-circle-exclamation"></i> Cannot cover personal bills!</div>
-            </div>
+          <div id="dash-wallets-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Wallets mapped via JS -->
           </div>
         </div>
 
       </div>
 
-      <!-- Scenarios Save Point (Moved to bottom of final results) -->
-      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-sm">
+      <!-- Scenarios Save Point -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-sm max-w-4xl mx-auto">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -557,7 +459,7 @@
             <p class="text-[10px] text-slate-500 mt-1">Want to keep this calculation to compare later? Save it below.</p>
           </div>
           <div class="flex gap-2 w-full md:w-auto">
-            <input type="text" id="scenario-name-input" placeholder="e.g. Dream House" class="flex-1 md:w-48 bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-100 focus:ring-1 focus:ring-brand-500 outline-none">
+            <input type="text" id="scenario-name-input" placeholder="e.g. 3 Roommate Split" class="flex-1 md:w-48 bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-100 focus:ring-1 focus:ring-brand-500 outline-none">
             <button onclick="saveScenario()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition-colors shadow-md whitespace-nowrap">Save</button>
           </div>
         </div>
@@ -577,7 +479,7 @@
 
   <!-- Wizard Footer Controls -->
   <footer class="bg-slate-900 border-t border-slate-800 sticky bottom-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
       <button id="btn-prev" onclick="prevStep()" class="px-6 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-sm font-bold hover:bg-slate-800 transition-colors invisible">
         <i class="fa-solid fa-arrow-left mr-2"></i> Back
       </button>
@@ -591,44 +493,83 @@
   </footer>
 
   <script>
-    // System Generators & Helpers
+    // System Generators & Constants
     function generateId() { return Math.random().toString(36).substr(2, 9); }
+    const THEMES = ["brand", "emerald", "amber", "violet", "rose", "cyan"];
+    const THEME_COLORS = {
+      brand: '#0ea5e9', emerald: '#10b981', amber: '#f59e0b',
+      violet: '#8b5cf6', rose: '#f43f5e', cyan: '#06b6d4'
+    };
+
     let chartInstance = null;
     let saveTimeout = null;
-
-    // Wizard State
     let currentStep = 1;
     const totalSteps = 6;
 
-    // Core Data State
+    // N-Player Core Data State
     let state = {
-      p1Name: "Partner 1",
-      p2Name: "Partner 2",
-      p1Incomes: [{ id: generateId(), label: "Primary Salary", amount: 6000 }],
-      p2Incomes: [{ id: generateId(), label: "Primary Salary", amount: 5000 }],
+      users: [
+        { 
+          id: generateId(), name: "Partner 1", theme: "brand",
+          incomes: [{ id: generateId(), label: "Primary Salary", amount: 6000 }],
+          expenses: [{ id: generateId(), label: "Student Loan", amount: 300 }]
+        },
+        { 
+          id: generateId(), name: "Partner 2", theme: "emerald",
+          incomes: [{ id: generateId(), label: "Primary Salary", amount: 5000 }],
+          expenses: [{ id: generateId(), label: "Car Payment", amount: 400 }]
+        }
+      ],
       jointExpenses: [
         { id: generateId(), label: "Rent / Mortgage", amount: 2500 },
         { id: generateId(), label: "Groceries & Household", amount: 800 }
       ],
-      p1Expenses: [{ id: generateId(), label: "Student Loan", amount: 300 }],
-      p2Expenses: [{ id: generateId(), label: "Car Payment", amount: 400 }],
       savingsTarget: 1000,
       approach: 1
     };
 
     let savedScenarios = [];
 
-    // Init
+    // --- CUSTOM MODAL SYSTEM ---
+    function showModal(title, msg, confirmCallback) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-msg').innerText = msg;
+      
+      const actions = document.getElementById('modal-actions');
+      actions.innerHTML = '';
+      
+      if (confirmCallback) {
+        actions.innerHTML = `<button onclick="closeModal()" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors">Cancel</button>`;
+        const btn = document.createElement('button');
+        btn.className = "px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-colors shadow-lg shadow-rose-500/20";
+        btn.innerText = "Yes, Restart";
+        btn.onclick = confirmCallback;
+        actions.appendChild(btn);
+      } else {
+        actions.innerHTML = `<button onclick="closeModal()" class="px-6 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-colors shadow-lg shadow-brand-500/20">OK</button>`;
+      }
+      
+      const modal = document.getElementById('custom-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('custom-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // --- INIT ---
     window.onload = function() {
       loadState();
-      renderAllDynamicLists();
-      updateNames();
+      renderAll();
       runMortgageEstimator();
       renderSavedScenarios();
       updateWizardUI();
     };
 
-    // --- WIZARD LOGIC ---
+    // --- WIZARD NAVIGATION ---
     function nextStep() {
       if (currentStep < totalSteps) {
         currentStep++;
@@ -636,7 +577,6 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
-
     function prevStep() {
       if (currentStep > 1) {
         currentStep--;
@@ -644,7 +584,6 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
-
     function goToStep(step) {
       currentStep = step;
       updateWizardUI();
@@ -652,17 +591,13 @@
     }
 
     function updateWizardUI() {
-      // Hide all steps, show current
       document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
       const activeStep = document.getElementById(`step-${currentStep}`);
       if (activeStep) activeStep.classList.add('active');
 
-      // Update Progress Bar
       const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
-      const progressFill = document.getElementById('progress-fill');
-      if (progressFill) progressFill.style.width = `${progress}%`;
+      document.getElementById('progress-fill').style.width = `${progress}%`;
 
-      // Update Dots
       for (let i = 1; i <= totalSteps; i++) {
         const dot = document.getElementById(`dot-${i}`);
         const lbl = document.getElementById(`lbl-dot-${i}`);
@@ -677,25 +612,15 @@
         }
       }
 
-      // Footer Controls
       const btnPrev = document.getElementById('btn-prev');
       const btnNext = document.getElementById('btn-next');
-      const footerText = document.getElementById('footer-text');
+      document.getElementById('footer-text').innerText = `Step ${currentStep} of ${totalSteps}`;
+
+      if (btnPrev) btnPrev.classList.toggle('invisible', currentStep === 1);
       
-      if (footerText) footerText.innerText = `Step ${currentStep} of ${totalSteps}`;
-
-      if (btnPrev) {
-        if (currentStep === 1) {
-          btnPrev.classList.add('invisible');
-        } else {
-          btnPrev.classList.remove('invisible');
-        }
-      }
-
       if (btnNext) {
         if (currentStep === totalSteps) {
           btnNext.classList.add('hidden');
-          // Trigger chart render explicitly when arriving at step 6
           runCalculations();
         } else {
           btnNext.classList.remove('hidden');
@@ -708,36 +633,181 @@
           }
         }
       }
-
-      // Recalculate anytime we move steps to ensure localized step data is fresh
       runCalculations(false); 
     }
 
-    // --- DOM RENDERING ---
-    function renderDynamicList(listKey, containerId, themeColor) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
+    // --- DYNAMIC RENDERING (N-PLAYER) ---
+    function renderAll() {
+      renderUserConfigList();
+      renderIncomeGrid();
+      renderExpenseGrid();
+      renderJointExpenses();
       
+      const s1 = document.getElementById('wiz-app2-savings-slider');
+      const s2 = document.getElementById('step6-savings-slider');
+      if (s1) s1.value = state.savingsTarget;
+      if (s2) s2.value = state.savingsTarget;
+      
+      switchSplitApproach(state.approach, false);
+      runCalculations();
+    }
+
+    function renderUserConfigList() {
+      const container = document.getElementById('users-list-container');
+      container.innerHTML = '';
+
+      state.users.forEach((u, index) => {
+        const div = document.createElement('div');
+        div.className = "bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between";
+        div.innerHTML = `
+          <div class="flex items-center flex-1">
+            <div class="w-8 h-8 rounded-full bg-${u.theme}-500/20 flex items-center justify-center mr-4">
+              <i class="fa-solid fa-user text-${u.theme}-500 text-sm"></i>
+            </div>
+            <div class="flex-1">
+              <label class="text-[10px] text-slate-500 block mb-0.5">Member ${index + 1} Name</label>
+              <input type="text" value="${u.name}" onchange="updateUserName('${u.id}', this.value)" class="w-full bg-transparent border-none p-0 text-lg font-bold text-slate-200 focus:ring-0 outline-none placeholder-slate-700" placeholder="Name">
+            </div>
+          </div>
+          ${state.users.length > 1 ? `
+          <button onclick="removeUser('${u.id}')" class="p-3 text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+          ` : ''}
+        `;
+        container.appendChild(div);
+      });
+      
+      // Hide strategy switch info if only 1 user
+      const stratDesc = document.getElementById('wiz-strategy-desc');
+      if (stratDesc) {
+        if (state.users.length === 1) {
+          stratDesc.innerHTML = `<strong class="text-white" id="wiz-strategy-income">$0</strong>/mo income vs <strong class="text-white" id="wiz-strategy-bills">$0</strong>/mo in bills. Since you're budgeting solo, both strategies lead to the same final math!`;
+        } else {
+          stratDesc.innerHTML = `Your household generates <strong class="text-white" id="wiz-strategy-income">$0</strong>/mo and shares <strong class="text-white" id="wiz-strategy-bills">$0</strong>/mo in joint bills. How should we divide those bills?`;
+        }
+      }
+    }
+
+    function renderIncomeGrid() {
+      const container = document.getElementById('step2-income-grid');
       container.innerHTML = '';
       
-      if (state[listKey].length === 0) {
-        container.innerHTML = `<p class="text-[10px] text-slate-600 italic">No items added.</p>`;
+      state.users.forEach(u => {
+        const total = u.incomes.reduce((sum, item) => sum + item.amount, 0);
+        const card = document.createElement('div');
+        card.className = `theme-${u.theme} bg-slate-900/80 border rounded-3xl p-6 shadow-xl relative overflow-hidden`;
+        
+        let listHTML = u.incomes.length === 0 ? `<p class="text-[10px] text-slate-600 italic">No incomes added.</p>` : '';
+        u.incomes.forEach(inc => {
+          listHTML += `
+            <div class="flex items-center gap-2 list-item-enter mb-2">
+              <div class="relative flex-1 group">
+                 <input type="text" value="${inc.label}" onchange="updateUserItem('${u.id}', 'incomes', '${inc.id}', 'label', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs rounded-lg px-2 py-2 text-slate-300 focus:ring-1 focus:ring-${u.theme}-500 outline-none" placeholder="Label">
+              </div>
+              <div class="relative w-1/3 group">
+                 <span class="absolute left-2.5 top-2 text-xs text-slate-500">$</span>
+                 <input type="number" value="${inc.amount}" oninput="updateUserItem('${u.id}', 'incomes', '${inc.id}', 'amount', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs font-bold rounded-lg pl-6 pr-2 py-2 text-slate-100 focus:ring-1 focus:ring-${u.theme}-500 outline-none">
+              </div>
+              <button onclick="removeUserItem('${u.id}', 'incomes', '${inc.id}')" class="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="absolute top-0 right-0 w-32 h-32 bg-${u.theme}-500/5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-theme-${u.theme} text-lg">${u.name}</h3>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Total Net</span>
+              <span id="inc-total-${u.id}" class="text-lg font-bold text-theme-${u.theme}">$${Math.round(total).toLocaleString()}</span>
+            </div>
+          </div>
+          <div class="mb-4">${listHTML}</div>
+          <button onclick="addUserItem('${u.id}', 'incomes')" class="w-full py-2 rounded-xl border border-${u.theme}-500/30 text-theme-${u.theme} text-xs font-bold hover:bg-${u.theme}-500/10 transition-colors">
+            <i class="fa-solid fa-plus mr-1"></i> Add Income
+          </button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderExpenseGrid() {
+      const container = document.getElementById('step4-expense-grid');
+      container.innerHTML = '';
+      
+      state.users.forEach(u => {
+        const total = u.expenses.reduce((sum, item) => sum + item.amount, 0);
+        const card = document.createElement('div');
+        card.className = `theme-${u.theme} bg-slate-900/80 border rounded-3xl p-6 shadow-xl relative overflow-hidden`;
+        
+        let listHTML = u.expenses.length === 0 ? `<p class="text-[10px] text-slate-600 italic">No personal bills.</p>` : '';
+        u.expenses.forEach(exp => {
+          listHTML += `
+            <div class="flex items-center gap-2 list-item-enter mb-2">
+              <div class="relative flex-1 group">
+                 <input type="text" value="${exp.label}" onchange="updateUserItem('${u.id}', 'expenses', '${exp.id}', 'label', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs rounded-lg px-2 py-2 text-slate-300 focus:ring-1 focus:ring-rose-500 outline-none" placeholder="Label">
+              </div>
+              <div class="relative w-1/3 group">
+                 <span class="absolute left-2.5 top-2 text-xs text-slate-500">$</span>
+                 <input type="number" value="${exp.amount}" oninput="updateUserItem('${u.id}', 'expenses', '${exp.id}', 'amount', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs font-bold rounded-lg pl-6 pr-2 py-2 text-slate-100 focus:ring-1 focus:ring-rose-500 outline-none">
+              </div>
+              <button onclick="removeUserItem('${u.id}', 'expenses', '${exp.id}')" class="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="font-bold text-slate-200 text-sm uppercase tracking-wider">${u.name}</h3>
+              <p class="text-[10px] text-slate-500 mt-0.5">Individual Bills</p>
+            </div>
+            <div class="text-right bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+              <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Total</span>
+              <span id="exp-total-${u.id}" class="text-sm font-bold text-rose-400">$${Math.round(total).toLocaleString()}</span>
+            </div>
+          </div>
+          <div class="mb-4">${listHTML}</div>
+          <button onclick="addUserItem('${u.id}', 'expenses')" class="w-full py-2 rounded-xl border border-slate-700 text-slate-400 text-xs font-bold hover:bg-slate-800 hover:text-slate-200 transition-colors">
+            <i class="fa-solid fa-plus mr-1"></i> Add Personal Bill
+          </button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderJointExpenses() {
+      const container = document.getElementById('joint-expenses-list');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      const total = state.jointExpenses.reduce((sum, item) => sum + item.amount, 0);
+      const sub = document.getElementById('subtotal-joint');
+      if (sub) sub.innerText = '$' + Math.round(total).toLocaleString();
+
+      if (state.jointExpenses.length === 0) {
+        container.innerHTML = `<p class="text-[10px] text-slate-600 italic">No joint bills added.</p>`;
         return;
       }
 
-      state[listKey].forEach(item => {
+      state.jointExpenses.forEach(item => {
         const div = document.createElement('div');
         div.className = "flex items-center gap-2 list-item-enter";
         div.innerHTML = `
           <div class="relative flex-1 group">
-             <i class="fa-solid fa-tag absolute left-2.5 top-2.5 text-[10px] text-slate-600 transition-colors group-focus-within:text-${themeColor}-500"></i>
-             <input type="text" value="${item.label}" onchange="updateItem('${listKey}', '${item.id}', 'label', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs rounded-lg pl-7 pr-2 py-2 text-slate-300 focus:ring-1 focus:ring-${themeColor}-500 outline-none placeholder-slate-600" placeholder="Label">
+             <i class="fa-solid fa-tag absolute left-2.5 top-2.5 text-[10px] text-slate-600 transition-colors group-focus-within:text-amber-500"></i>
+             <input type="text" value="${item.label}" onchange="updateJointItem('${item.id}', 'label', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs rounded-lg pl-7 pr-2 py-2 text-slate-300 focus:ring-1 focus:ring-amber-500 outline-none" placeholder="Label">
           </div>
           <div class="relative w-1/3 group">
-             <span class="absolute left-2.5 top-2 text-xs text-slate-500 transition-colors group-focus-within:text-${themeColor}-500">$</span>
-             <input type="number" value="${item.amount}" oninput="updateItem('${listKey}', '${item.id}', 'amount', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs font-bold rounded-lg pl-6 pr-2 py-2 text-slate-100 focus:ring-1 focus:ring-${themeColor}-500 outline-none">
+             <span class="absolute left-2.5 top-2 text-xs text-slate-500 transition-colors group-focus-within:text-amber-500">$</span>
+             <input type="number" value="${item.amount}" oninput="updateJointItem('${item.id}', 'amount', this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs font-bold rounded-lg pl-6 pr-2 py-2 text-slate-100 focus:ring-1 focus:ring-amber-500 outline-none">
           </div>
-          <button onclick="removeItem('${listKey}', '${item.id}')" class="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+          <button onclick="removeJointItem('${item.id}')" class="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
             <i class="fa-solid fa-trash-can text-xs"></i>
           </button>
         `;
@@ -745,59 +815,72 @@
       });
     }
 
-    function renderAllDynamicLists() {
-      renderDynamicList('p1Incomes', 'p1-incomes-list', 'brand');
-      renderDynamicList('p2Incomes', 'p2-incomes-list', 'emerald');
-      renderDynamicList('jointExpenses', 'joint-expenses-list', 'amber');
-      renderDynamicList('p1Expenses', 'p1-expenses-list', 'rose');
-      renderDynamicList('p2Expenses', 'p2-expenses-list', 'rose');
-      
-      const savingsSlider1 = document.getElementById('wiz-app2-savings-slider');
-      const savingsSlider2 = document.getElementById('step6-savings-slider');
-      if (savingsSlider1) savingsSlider1.value = state.savingsTarget;
-      if (savingsSlider2) savingsSlider2.value = state.savingsTarget;
-      
-      switchSplitApproach(state.approach, false);
-      runCalculations();
+    // --- STATE MODIFIERS ---
+    function addUser() {
+      if (state.users.length >= 6) { 
+        showModal("Limit Reached", "Maximum 6 members allowed in this wizard.", null);
+        return; 
+      }
+      const theme = THEMES[state.users.length % THEMES.length];
+      state.users.push({
+        id: generateId(), name: `Member ${state.users.length + 1}`, theme: theme,
+        incomes: [], expenses: []
+      });
+      renderAll();
+    }
+    
+    function removeUser(userId) {
+      if (state.users.length <= 1) return;
+      state.users = state.users.filter(u => u.id !== userId);
+      // Re-theme
+      state.users.forEach((u, i) => u.theme = THEMES[i % THEMES.length]);
+      renderAll();
+    }
+    
+    function updateUserName(userId, val) {
+      const u = state.users.find(u => u.id === userId);
+      if (u) u.name = val || 'Unnamed';
+      renderAll(); // Full refresh to update labels
     }
 
-    function updateNames() {
-      const p1Input = document.getElementById('name-p1');
-      const p2Input = document.getElementById('name-p2');
-      
-      const p1 = p1Input ? p1Input.value || 'Partner 1' : 'Partner 1';
-      const p2 = p2Input ? p2Input.value || 'Partner 2' : 'Partner 2';
-      
-      state.p1Name = p1;
-      state.p2Name = p2;
-      
-      document.querySelectorAll('.display-name-p1').forEach(el => el.innerText = p1);
-      document.querySelectorAll('.display-name-p2').forEach(el => el.innerText = p2);
-      
+    function addUserItem(userId, type) {
+      const u = state.users.find(u => u.id === userId);
+      if (u) u[type].push({ id: generateId(), label: "New Item", amount: 0 });
+      renderAll();
+    }
+    
+    function removeUserItem(userId, type, itemId) {
+      const u = state.users.find(u => u.id === userId);
+      if (u) u[type] = u[type].filter(i => i.id !== itemId);
+      renderAll();
+    }
+    
+    function updateUserItem(userId, type, itemId, field, val) {
+      const u = state.users.find(u => u.id === userId);
+      if (u) {
+        const item = u[type].find(i => i.id === itemId);
+        if (item) item[field] = field === 'amount' ? (parseFloat(val) || 0) : val;
+      }
       runCalculations(); 
     }
 
-    function addDynamicItem(listKey) {
-      state[listKey].push({ id: generateId(), label: "New Item", amount: 0 });
-      renderAllDynamicLists();
+    function addJointItem() {
+      state.jointExpenses.push({ id: generateId(), label: "New Bill", amount: 0 });
+      renderJointExpenses();
+      runCalculations();
     }
-
-    function removeItem(listKey, id) {
-      state[listKey] = state[listKey].filter(item => item.id !== id);
-      renderAllDynamicLists();
+    function removeJointItem(id) {
+      state.jointExpenses = state.jointExpenses.filter(i => i.id !== id);
+      renderJointExpenses();
+      runCalculations();
     }
-
-    function updateItem(listKey, id, field, value) {
-      const item = state[listKey].find(i => i.id === id);
-      if (item) item[field] = field === 'amount' ? (parseFloat(value) || 0) : value;
+    function updateJointItem(id, field, val) {
+      const item = state.jointExpenses.find(i => i.id === id);
+      if (item) item[field] = field === 'amount' ? (parseFloat(val) || 0) : val;
       runCalculations();
     }
 
-    function sumList(listKey) {
-      return state[listKey].reduce((acc, curr) => acc + curr.amount, 0);
-    }
-
-    // --- MORTGAGE TOOL ---
+    // --- MORTGAGE ---
     function runMortgageEstimator(changedField) {
       const priceInput = document.getElementById('input-est-price');
       const downPctEl = document.getElementById('input-est-down-pct');
@@ -807,15 +890,11 @@
       const taxInput = document.getElementById('input-est-tax');
       const insInput = document.getElementById('input-est-ins');
       
-      // Safety check to ensure core DOM elements are present
       if (!priceInput || !downPctEl || !downAmtEl || !rateInput) return;
 
       const price = parseFloat(priceInput.value) || 0;
       const rate = parseFloat(rateInput.value) || 0;
-      
       const termYears = termInput ? parseInt(termInput.value) || 30 : 30;
-      const numPayments = termYears * 12;
-
       const taxRate = taxInput ? parseFloat(taxInput.value) || 0 : 1.2;
       const insAmt = insInput ? parseFloat(insInput.value) || 0 : 125;
 
@@ -832,21 +911,21 @@
         downPct = price > 0 ? (downAmt / price) * 100 : 0;
         downPctEl.value = parseFloat(downPct.toFixed(1));
       } else {
-        // If price changes, resync down amount based on current down pct
         downAmt = price * (downPct / 100);
         downAmtEl.value = Math.round(downAmt);
       }
 
       const loanAmt = price - downAmt;
       const mRate = (rate / 100) / 12;
+      const numPayments = termYears * 12;
+      
       let mPI = 0;
       if (loanAmt > 0) {
         mPI = mRate > 0 ? loanAmt * (mRate * Math.pow(1 + mRate, numPayments)) / (Math.pow(1 + mRate, numPayments) - 1) : loanAmt / numPayments;
       }
 
       const mTax = (price * (taxRate / 100)) / 12;
-      const mIns = insAmt;
-      const totalPITI = mPI + mTax + mIns;
+      const totalPITI = mPI + mTax + insAmt;
 
       const estTotal = document.getElementById('est-total-piti');
       if (estTotal) {
@@ -858,40 +937,33 @@
     function injectMortgageToJoint(e) {
       const estTotal = document.getElementById('est-total-piti');
       if (!estTotal) return;
-      
       const val = parseInt(estTotal.dataset.val) || 0;
-      
-      // Always push a brand new line item for the mortgage
       state.jointExpenses.push({ id: generateId(), label: "New Mortgage Est.", amount: val });
+      renderJointExpenses();
+      runCalculations();
       
-      renderAllDynamicLists();
-      
-      // Visual feedback
       const btn = e.currentTarget;
       const og = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Added New Bill!';
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
       btn.classList.add('bg-emerald-600', 'text-white');
-      setTimeout(() => {
-        btn.innerHTML = og;
-        btn.classList.remove('bg-emerald-600', 'text-white');
-      }, 1500);
+      setTimeout(() => { btn.innerHTML = og; btn.classList.remove('bg-emerald-600', 'text-white'); }, 1500);
     }
 
     // --- STRATEGY UI ---
     function syncSavingsSlider(val) {
       val = parseFloat(val) || 0;
-      const badge1 = document.getElementById('wiz-app2-savings-badge');
-      const badge2 = document.getElementById('step6-savings-badge');
-      const slider1 = document.getElementById('wiz-app2-savings-slider');
-      const slider2 = document.getElementById('step6-savings-slider');
-
-      if (badge1) badge1.innerText = '$' + val.toLocaleString() + '/mo';
-      if (badge2) badge2.innerText = '$' + val.toLocaleString() + '/mo';
-      
-      if (slider1 && slider1.value != val) slider1.value = val;
-      if (slider2 && slider2.value != val) slider2.value = val;
-      
       state.savingsTarget = val;
+      
+      const b1 = document.getElementById('wiz-app2-savings-badge');
+      const b2 = document.getElementById('step6-savings-badge');
+      if(b1) b1.innerText = '$' + val.toLocaleString() + '/mo';
+      if(b2) b2.innerText = '$' + val.toLocaleString() + '/mo';
+      
+      const s1 = document.getElementById('wiz-app2-savings-slider');
+      const s2 = document.getElementById('step6-savings-slider');
+      if(s1 && s1.value != val) s1.value = val;
+      if(s2 && s2.value != val) s2.value = val;
+      
       runCalculations();
     }
 
@@ -907,129 +979,117 @@
       if (num === 1) {
         c1.className = "cursor-pointer group relative bg-slate-900 border-2 border-brand-500 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1";
         ch1.className = "w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center";
-        
         c2.className = "cursor-pointer group relative bg-slate-900 border-2 border-transparent hover:border-slate-700 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1 opacity-60 hover:opacity-100";
         ch2.className = "w-6 h-6 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center transition-colors";
       } else {
         c2.className = "cursor-pointer group relative bg-slate-900 border-2 border-brand-500 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1";
         ch2.className = "w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center transition-colors";
-
         c1.className = "cursor-pointer group relative bg-slate-900 border-2 border-transparent hover:border-slate-700 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1 opacity-60 hover:opacity-100";
         ch1.className = "w-6 h-6 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center";
       }
       if (shouldCalc) runCalculations();
     }
 
-    // --- MAIN MATH ENGINE ---
+    // --- MAIN MATH ENGINE (N-PLAYER) ---
     function runCalculations(triggerSave = true) {
-      // Sums
-      const p1IncSum = sumList('p1Incomes');
-      const p2IncSum = sumList('p2Incomes');
-      const jointExpSum = sumList('jointExpenses');
-      const p1PersExp = sumList('p1Expenses');
-      const p2PersExp = sumList('p2Expenses');
-
-      const totalPool = p1IncSum + p2IncSum;
-      let p1Pct = totalPool > 0 ? (p1IncSum / totalPool) * 100 : 0;
-      let p2Pct = totalPool > 0 ? (p2IncSum / totalPool) * 100 : 0;
-
-      // Update Step UI elements (Mini totals)
-      const u = (id, text) => { const e = document.getElementById(id); if (e) e.innerText = text; };
+      // 1. Calculate Core Totals
+      const jointExpSum = state.jointExpenses.reduce((sum, item) => sum + item.amount, 0);
       
-      u('subtotal-p1-inc', '$' + Math.round(p1IncSum).toLocaleString());
-      u('subtotal-p2-inc', '$' + Math.round(p2IncSum).toLocaleString());
-      u('wizard-total-income', '$' + Math.round(totalPool).toLocaleString());
-      u('subtotal-joint', '$' + Math.round(jointExpSum).toLocaleString());
-      u('subtotal-p1-exp', '$' + Math.round(p1PersExp).toLocaleString());
-      u('subtotal-p2-exp', '$' + Math.round(p2PersExp).toLocaleString());
-
-      // Step 5 Strategy Header
-      u('wiz-strategy-income', '$' + Math.round(totalPool).toLocaleString());
-      u('wiz-strategy-bills', '$' + Math.round(jointExpSum).toLocaleString());
+      let totalPool = 0;
+      let totalPersExp = 0;
       
-      // Calculate App 1 Previews
-      const app1P1Pay = jointExpSum * (p1Pct / 100);
-      const app1P2Pay = jointExpSum * (p2Pct / 100);
-      u('wiz-app1-ratio', `${Math.round(p1Pct)}% / ${Math.round(p2Pct)}%`);
-      u('wiz-app1-p1-pay', '$' + Math.round(app1P1Pay).toLocaleString());
-      u('wiz-app1-p2-pay', '$' + Math.round(app1P2Pay).toLocaleString());
+      // Calculate per-user base sums
+      state.users.forEach(u => {
+        u.incSum = u.incomes.reduce((sum, item) => sum + item.amount, 0);
+        u.expSum = u.expenses.reduce((sum, item) => sum + item.amount, 0);
+        totalPool += u.incSum;
+        totalPersExp += u.expSum;
+      });
 
-      // Calculate App 2 Previews
-      const totalAllBills = jointExpSum + p1PersExp + p2PersExp;
+      // Ratios
+      state.users.forEach(u => {
+        u.pct = totalPool > 0 ? (u.incSum / totalPool) * 100 : 0;
+      });
+
+      // Update Basic Top Level UI
+      const uEl = (id, text) => { const e = document.getElementById(id); if (e) e.innerText = text; };
+      uEl('wizard-total-income', '$' + Math.round(totalPool).toLocaleString());
+      uEl('wiz-strategy-income', '$' + Math.round(totalPool).toLocaleString());
+      uEl('wiz-strategy-bills', '$' + Math.round(jointExpSum).toLocaleString());
+      
+      // Update individual card subtotals quietly (fixes the typing focus bug!)
+      state.users.forEach(u => {
+        uEl(`inc-total-${u.id}`, '$' + Math.round(u.incSum).toLocaleString());
+        uEl(`exp-total-${u.id}`, '$' + Math.round(u.expSum).toLocaleString());
+      });
+      uEl('subtotal-joint', '$' + Math.round(jointExpSum).toLocaleString());
+
+      // --- APP 1 PREVIEW ---
+      const ratioStr = state.users.map(u => `${Math.round(u.pct)}%`).join(' / ');
+      uEl('wiz-app1-ratio', ratioStr);
+      
+      const app1Breakdown = document.getElementById('wiz-app1-breakdown');
+      if (app1Breakdown) {
+        app1Breakdown.innerHTML = state.users.map(u => {
+          const pay = jointExpSum * (u.pct / 100);
+          return `<span class="block"><strong class="text-theme-${u.theme}">${u.name}</strong> pays <strong class="text-white">$${Math.round(pay).toLocaleString()}</strong> towards joint bills.</span>`;
+        }).join('');
+      }
+
+      // --- APP 2 PREVIEW ---
+      const totalAllBills = jointExpSum + totalPersExp;
       const app2Surplus = totalPool - totalAllBills;
       const safeSavings = Math.min(Math.max(0, app2Surplus), state.savingsTarget);
-      const app2Fun = Math.max(0, app2Surplus - safeSavings) / 2;
+      const app2Fun = Math.max(0, app2Surplus - safeSavings) / state.users.length;
       
-      const app2FunMoneyEl = document.getElementById('wiz-app2-fun-money');
-      if (app2FunMoneyEl) {
-        app2FunMoneyEl.innerHTML = '$' + Math.round(app2Fun).toLocaleString() + ' <span class="text-[9px] text-slate-500 font-normal ml-1 uppercase tracking-wider block sm:inline">each in pocket money</span>';
+      const app2FunEl = document.getElementById('wiz-app2-fun-money');
+      if (app2FunEl) {
+        app2FunEl.innerHTML = '$' + Math.round(app2Fun).toLocaleString() + ' <span class="text-[9px] text-slate-500 font-normal ml-1 uppercase tracking-wider block sm:inline">each in pocket money</span>';
       }
 
-      // Hide or Show the dynamic slider control in Step 6
-      const step6Controls = document.getElementById('step6-strategy-controls');
-      if (step6Controls) {
-        if (state.approach === 2) {
-          step6Controls.classList.remove('hidden');
-        } else {
-          step6Controls.classList.add('hidden');
-        }
-      }
-
-      // --- FINAL CALCULATIONS FOR DASHBOARD (STEP 6) ---
-      let p1Contrib = 0, p2Contrib = 0;
-      let p1Pocket = 0, p2Pocket = 0;
-      let p1Final = 0, p2Final = 0;
-      let jointSavings = 0;
+      // --- FINAL CALCULATIONS ---
       let dashJointBills = 0;
       let dashSurplus = 0;
+      let jointSavings = 0;
 
       if (state.approach === 1) {
         dashJointBills = jointExpSum;
         dashSurplus = totalPool - jointExpSum;
-        p1Contrib = app1P1Pay;
-        p2Contrib = app1P2Pay;
-        p1Pocket = Math.max(0, p1IncSum - p1Contrib);
-        p2Pocket = Math.max(0, p2IncSum - p2Contrib);
         jointSavings = 0;
-        p1Final = p1Pocket - p1PersExp;
-        p2Final = p2Pocket - p2PersExp;
-
-        u('lbl-p1-pers', "- Personal Bills");
-        u('p1-personal-bills', '-$' + Math.round(p1PersExp).toLocaleString());
-        u('lbl-p2-pers', "- Personal Bills");
-        u('p2-personal-bills', '-$' + Math.round(p2PersExp).toLocaleString());
-        u('dash-strategy-label', "Proportional Split");
         
-        // Update Chart Labels dynamically
-        u('chart-title', "Contribution to Joint Bills");
-        u('chart-subtitle', "Amount paid into the joint account based on income ratio.");
+        state.users.forEach(u => {
+          u.contrib = jointExpSum * (u.pct / 100);
+          u.pocketBase = Math.max(0, u.incSum - u.contrib);
+          u.finalDisc = u.pocketBase - u.expSum;
+        });
+
+        uEl('dash-strategy-label', "Proportional Split");
+        uEl('chart-title', "Contribution to Joint Bills");
+        uEl('chart-subtitle', "Amount paid into the joint account based on income ratio.");
       } else {
         dashJointBills = totalAllBills;
         dashSurplus = app2Surplus;
         jointSavings = safeSavings;
         
-        p1Pocket = app2Fun;
-        p2Pocket = app2Fun;
-        p1Final = p1Pocket;
-        p2Final = p2Pocket;
+        state.users.forEach(u => {
+          u.pocketBase = app2Fun;
+          u.finalDisc = app2Fun; // Pers bills paid by pool
+          u.contrib = Math.max(0, u.incSum - u.pocketBase);
+        });
 
-        // P1 Contrib is what they send to the central pool. The pool covers Joint, Savings, and ALL personal bills.
-        // Mathematically, if you keep your exact Fun Money, your contribution is Income - Fun Money.
-        p1Contrib = Math.max(0, p1IncSum - p1Pocket);
-        p2Contrib = Math.max(0, p2IncSum - p2Pocket);
-
-        u('lbl-p1-pers', "Personal Bills (Paid by Pool)");
-        u('p1-personal-bills', '-$0');
-        u('lbl-p2-pers', "Personal Bills (Paid by Pool)");
-        u('p2-personal-bills', '-$0');
-        u('dash-strategy-label', "Equal Fun Money");
-
-        // Update Chart Labels dynamically
-        u('chart-title', "Contribution to Central Pool");
-        u('chart-subtitle', "(Your Net Income minus your Equal Pocket Money allowance)");
+        uEl('dash-strategy-label', "Equal Fun Money");
+        uEl('chart-title', "Contribution to Central Pool");
+        uEl('chart-subtitle', "(Net Income minus Equal Pocket allowance)");
       }
 
-      // Warnings Check
+      // Hide or Show dynamic slider in Step 6
+      const step6Controls = document.getElementById('step6-strategy-controls');
+      if (step6Controls) {
+        if (state.approach === 2 && state.users.length > 0) step6Controls.classList.remove('hidden');
+        else step6Controls.classList.add('hidden');
+      }
+
+      // Warnings
       const warnZone = document.getElementById('warning-zone');
       if (warnZone) {
         if (dashSurplus < 0) {
@@ -1041,85 +1101,144 @@
         }
       }
 
-      // Step 6 Updates
-      u('dash-joint-income', '$' + Math.round(totalPool).toLocaleString());
-      u('dash-joint-bills', '$' + Math.round(dashJointBills).toLocaleString());
-      u('dash-joint-savings', '$' + Math.round(jointSavings).toLocaleString());
+      // Update Step 6 Tops
+      uEl('dash-joint-income', '$' + Math.round(totalPool).toLocaleString());
+      uEl('dash-joint-bills', '$' + Math.round(dashJointBills).toLocaleString());
+      uEl('dash-joint-savings', '$' + Math.round(jointSavings).toLocaleString());
       
       const elSurplus = document.getElementById('dash-household-surplus');
       if (elSurplus) {
         elSurplus.innerText = (dashSurplus < 0 ? '-' : '') + '$' + Math.abs(Math.round(dashSurplus)).toLocaleString();
         elSurplus.className = dashSurplus < 0 ? 'text-xl font-bold text-rose-400 mt-1' : 'text-xl font-bold text-emerald-400 mt-1';
       }
-      
-      // Chart center values
-      u('dash-p1-contrib', '$' + Math.round(p1Contrib).toLocaleString());
-      u('dash-p2-contrib', '$' + Math.round(p2Contrib).toLocaleString());
+      const dashSurplusCont = document.getElementById('dash-surplus-container');
+      if(dashSurplusCont) dashSurplusCont.className = dashSurplus < 0 ? "bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-rose-500" : "bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-emerald-500";
 
-      // P1 Wallet Detailed Breakdown
-      u('p1-starting-income', '$' + Math.round(p1IncSum).toLocaleString());
-      u('p1-joint-contrib', '-$' + Math.round(p1Contrib).toLocaleString());
-      u('p1-pocket-base', '$' + Math.round(p1Pocket).toLocaleString());
-      const p1F = document.getElementById('p1-final-discretionary');
-      if (p1F) {
-        p1F.innerText = (p1Final < 0 ? '-' : '') + '$' + Math.abs(Math.round(p1Final)).toLocaleString();
-        p1F.className = p1Final < 0 ? "text-xl font-bold text-rose-400" : "text-xl font-bold text-brand-400";
-      }
-      const p1DefWarn = document.getElementById('p1-deficit-warning');
-      if (p1DefWarn) p1DefWarn.style.display = p1Final < 0 ? 'block' : 'none';
+      // Render Dynamic Wallets & Legend
+      const walletsGrid = document.getElementById('dash-wallets-grid');
+      const legendCont = document.getElementById('chart-legend-container');
+      if (walletsGrid) walletsGrid.innerHTML = '';
+      if (legendCont) legendCont.innerHTML = '';
 
-      // P2 Wallet Detailed Breakdown
-      u('p2-starting-income', '$' + Math.round(p2IncSum).toLocaleString());
-      u('p2-joint-contrib', '-$' + Math.round(p2Contrib).toLocaleString());
-      u('p2-pocket-base', '$' + Math.round(p2Pocket).toLocaleString());
-      const p2F = document.getElementById('p2-final-discretionary');
-      if (p2F) {
-        p2F.innerText = (p2Final < 0 ? '-' : '') + '$' + Math.abs(Math.round(p2Final)).toLocaleString();
-        p2F.className = p2Final < 0 ? "text-xl font-bold text-rose-400" : "text-xl font-bold text-emerald-400";
-      }
-      const p2DefWarn = document.getElementById('p2-deficit-warning');
-      if (p2DefWarn) p2DefWarn.style.display = p2Final < 0 ? 'block' : 'none';
+      state.users.forEach(u => {
+        // Legend Line
+        if (legendCont) {
+          legendCont.innerHTML += `
+            <div class="flex justify-between text-slate-400">
+              <span class="flex items-center gap-1.5"><div class="w-2 h-2 bg-theme-${u.theme} rounded-full"></div>${u.name} Contrib</span>
+              <span class="font-bold text-slate-200">$${Math.round(u.contrib).toLocaleString()}</span>
+            </div>
+          `;
+        }
 
-      u('chart-center-ratio', `${Math.round(p1Pct)}% / ${Math.round(p2Pct)}%`);
+        // Wallet Card
+        if (walletsGrid) {
+          const card = document.createElement('div');
+          card.className = `theme-${u.theme} bg-slate-950 p-5 rounded-2xl border relative overflow-hidden`;
+          
+          let persBillHtml = '';
+          if (state.approach === 1) {
+             persBillHtml = `
+               <div class="flex justify-between text-rose-400/80">
+                 <span>- Personal Bills</span>
+                 <span>-$${Math.round(u.expSum).toLocaleString()}</span>
+               </div>
+             `;
+          } else {
+             persBillHtml = `
+               <div class="flex justify-between text-rose-400/80">
+                 <span>Personal Bills (Pool Paid)</span>
+                 <span>-$0</span>
+               </div>
+             `;
+          }
+
+          card.innerHTML = `
+            <div class="flex justify-between items-center border-b border-slate-800/50 pb-2 mb-3">
+               <span class="text-sm font-bold text-theme-${u.theme}">${u.name}</span>
+               <span class="text-[9px] text-slate-500">${Math.round(u.pct)}% Income Share</span>
+             </div>
+             <div class="space-y-2 text-xs">
+               <div class="flex justify-between text-slate-400">
+                 <span>Starting Net Income</span>
+                 <span class="font-bold text-slate-200">$${Math.round(u.incSum).toLocaleString()}</span>
+               </div>
+               <div class="flex justify-between text-amber-400/80">
+                 <span>- Joint Contribution</span>
+                 <span>-$${Math.round(u.contrib).toLocaleString()}</span>
+               </div>
+               <div class="h-px bg-slate-800 my-1"></div>
+               <div class="flex justify-between text-slate-300">
+                 <span>Pocket Money Base</span>
+                 <span class="font-bold text-slate-200">$${Math.round(u.pocketBase).toLocaleString()}</span>
+               </div>
+               ${persBillHtml}
+               <div class="h-px bg-slate-800 my-2"></div>
+               <div class="flex justify-between items-center">
+                 <span class="font-bold text-slate-300">Final Discretionary</span>
+                 <span class="text-xl font-bold ${u.finalDisc < 0 ? 'text-rose-400' : 'text-theme-' + u.theme}">
+                   ${u.finalDisc < 0 ? '-' : ''}$${Math.abs(Math.round(u.finalDisc)).toLocaleString()}
+                 </span>
+               </div>
+             </div>
+             ${u.finalDisc < 0 ? `<div class="text-[10px] text-rose-400 font-bold mt-3"><i class="fa-solid fa-circle-exclamation"></i> Cannot cover personal bills!</div>` : ''}
+          `;
+          walletsGrid.appendChild(card);
+        }
+      });
 
       if (currentStep === 6) {
-        updateChart(p1Contrib, p2Contrib, jointSavings);
+        updateChart(jointSavings);
       }
 
       if (triggerSave) triggerAutoSave();
     }
 
-    // --- CHART ENGINE ---
-    function updateChart(p1C, p2C, js) {
+    // --- CHART ENGINE (N-PLAYER DYNAMIC) ---
+    function updateChart(js) {
       const ctxEl = document.getElementById('budgetChart');
       if (!ctxEl) return;
       const ctx = ctxEl.getContext('2d');
       
-      const vals = [Math.max(0, p1C), Math.max(0, p2C), Math.max(0, js)];
-      const isZ = vals.every(v => v === 0);
-      const data = isZ ? [1,1,0] : vals;
-      const colors = isZ ? ['#1e293b','#1e293b','#1e293b'] : ['#0ea5e9', '#10b981', '#818cf8'];
+      const labels = state.users.map(u => u.name);
+      labels.push('Joint Savings');
+      
+      const dataVals = state.users.map(u => Math.max(0, u.contrib));
+      dataVals.push(Math.max(0, js));
+
+      const colors = state.users.map(u => THEME_COLORS[u.theme]);
+      colors.push('#334155'); // Slate-700 for savings
+
+      const isZ = dataVals.every(v => v === 0);
+      const data = isZ ? dataVals.map(() => 1) : dataVals;
+      const safeColors = isZ ? dataVals.map(() => '#1e293b') : colors;
 
       if (chartInstance) {
-        chartInstance.data.labels = [state.p1Name, state.p2Name, 'Joint Savings'];
+        chartInstance.data.labels = labels;
         chartInstance.data.datasets[0].data = data;
-        chartInstance.data.datasets[0].backgroundColor = colors;
+        chartInstance.data.datasets[0].backgroundColor = safeColors;
         chartInstance.update();
       } else {
         chartInstance = new Chart(ctx, {
           type: 'doughnut',
           data: {
-            labels: [state.p1Name, state.p2Name, 'Joint Savings'],
-            datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#0f172a' }]
+            labels: labels,
+            datasets: [{ data: data, backgroundColor: safeColors, borderWidth: 2, borderColor: '#0f172a' }]
           },
-          options: { cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => isZ ? 'No Data' : `${c.label}: $${c.parsed.toLocaleString()}` } } } }
+          options: { 
+            cutout: '70%', responsive: true, maintainAspectRatio: false, 
+            plugins: { 
+              legend: { display: false }, 
+              tooltip: { callbacks: { label: c => isZ ? 'No Data' : `${c.label}: $${c.parsed.toLocaleString()}` } } 
+            } 
+          }
         });
       }
     }
 
     // --- STORAGE & SCENARIOS ---
     function triggerAutoSave() {
-      localStorage.setItem('ffh_wiz_state', JSON.stringify(state));
+      localStorage.setItem('ffh_np_state', JSON.stringify(state));
       const ind = document.getElementById('save-indicator');
       if (!ind) return;
       ind.classList.remove('opacity-0');
@@ -1129,28 +1248,25 @@
 
     function loadState() {
       try {
-        const saved = localStorage.getItem('ffh_wiz_state');
+        const saved = localStorage.getItem('ffh_np_state');
         if (saved) state = JSON.parse(saved);
-        const scens = localStorage.getItem('ffh_wiz_scenarios');
+        const scens = localStorage.getItem('ffh_np_scenarios');
         if (scens) savedScenarios = JSON.parse(scens);
       } catch(e) { console.error(e); }
-      
-      const p1Input = document.getElementById('name-p1');
-      if (p1Input) p1Input.value = state.p1Name || "Partner 1";
-      
-      const p2Input = document.getElementById('name-p2');
-      if (p2Input) p2Input.value = state.p2Name || "Partner 2";
     }
 
     function saveScenario() {
       const nameInp = document.getElementById('scenario-name-input');
       if (!nameInp) return;
       const name = nameInp.value.trim();
-      if(!name) { alert("Please enter a scenario name."); return; }
+      if(!name) { 
+        showModal("Missing Name", "Please enter a scenario name to save.", null);
+        return; 
+      }
       
       const snap = JSON.parse(JSON.stringify(state));
       savedScenarios.push({ id: generateId(), name: name, state: snap });
-      localStorage.setItem('ffh_wiz_scenarios', JSON.stringify(savedScenarios));
+      localStorage.setItem('ffh_np_scenarios', JSON.stringify(savedScenarios));
       
       nameInp.value = '';
       renderSavedScenarios();
@@ -1160,22 +1276,14 @@
       const target = savedScenarios.find(s => s.id === id);
       if(target) {
         state = JSON.parse(JSON.stringify(target.state));
-        
-        const p1Input = document.getElementById('name-p1');
-        if (p1Input) p1Input.value = state.p1Name;
-        
-        const p2Input = document.getElementById('name-p2');
-        if (p2Input) p2Input.value = state.p2Name;
-        
-        renderAllDynamicLists();
-        updateNames();
-        goToStep(6); // Jump to results when loading a scenario
+        renderAll();
+        goToStep(6); 
       }
     }
 
     function deleteScenario(id) {
       savedScenarios = savedScenarios.filter(s => s.id !== id);
-      localStorage.setItem('ffh_wiz_scenarios', JSON.stringify(savedScenarios));
+      localStorage.setItem('ffh_np_scenarios', JSON.stringify(savedScenarios));
       renderSavedScenarios();
     }
 
@@ -1209,10 +1317,32 @@
     }
 
     function resetDefaults() {
-      if(confirm("Wipe current inputs and restart the wizard?")) {
-        localStorage.removeItem('ffh_wiz_state');
-        location.reload();
-      }
+      showModal("Restart Wizard?", "Are you sure you want to wipe all unsaved inputs and start over?", function() {
+        localStorage.removeItem('ffh_np_state');
+        state = {
+          users: [
+            { 
+              id: generateId(), name: "Partner 1", theme: "brand",
+              incomes: [{ id: generateId(), label: "Primary Salary", amount: 6000 }],
+              expenses: [{ id: generateId(), label: "Student Loan", amount: 300 }]
+            },
+            { 
+              id: generateId(), name: "Partner 2", theme: "emerald",
+              incomes: [{ id: generateId(), label: "Primary Salary", amount: 5000 }],
+              expenses: [{ id: generateId(), label: "Car Payment", amount: 400 }]
+            }
+          ],
+          jointExpenses: [
+            { id: generateId(), label: "Rent / Mortgage", amount: 2500 },
+            { id: generateId(), label: "Groceries & Household", amount: 800 }
+          ],
+          savingsTarget: 1000,
+          approach: 1
+        };
+        renderAll();
+        goToStep(1);
+        closeModal();
+      });
     }
   </script>
 </body>
